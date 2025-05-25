@@ -1,8 +1,8 @@
-all: image
-
 BUILD_FLAGS :=
-IMAGE_NAME := jzer7/pandoc
-IMAGE_TAG := latex
+IMAGE_NAME ?= jzer7/pandoc
+IMAGE_TAG ?= latex
+
+all: image
 
 .PHONY: image
 

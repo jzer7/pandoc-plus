@@ -1,0 +1,13 @@
+version: "0.2"
+ignorePaths: []
+dictionaryDefinitions: []
+dictionaries: []
+words:
+  - buildx
+  - enumitem
+  - moderncv
+  - Pandoc
+  - sectsty
+  - tlmgr
+ignoreWords: []
+import: []

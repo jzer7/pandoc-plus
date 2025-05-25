@@ -8,6 +8,21 @@ This image adds a few additional LaTeX packages to build documentation.
 make image
 ```
 
+## Usage
+
+Usage is the same as with the original image:
+
+```sh
+docker run --rm --volume "`pwd`:/data" --user `id -u`:`id -g` jzer7/pandoc:latex README.md
+```
+
+To debug things, you might need to start in shell mode.
+For that, remove the _entrypoint_.
+
+```sh
+docker run --rm --volume "`pwd`:/data" --user `id -u`:`id -g` --entrypoint "" jzer7/pandoc:latex /bin/bash
+```
+
 ## Starting point
 
 This repo's Dockerfile start with the base image
