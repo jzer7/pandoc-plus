@@ -1,5 +1,10 @@
 {
     "files.exclude": {
         "**/*.swp": true
-    }
+    },
+    "[yaml]": {
+      "diffEditor.ignoreTrimWhitespace": false,
+      "editor.defaultFormatter": "redhat.vscode-yaml",
+      "editor.formatOnSave": true,
+    },
 }
