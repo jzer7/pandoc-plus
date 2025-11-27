@@ -26,6 +26,7 @@ RUN <<EOT bash
         moderncv \
         sectsty \
         underscore \
+        lastpage \
         ;
 EOT
 

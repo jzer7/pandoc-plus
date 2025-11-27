@@ -1,4 +1,5 @@
 .editorconfig
+.git
 .gitignore
 .vscode
 *.swp
