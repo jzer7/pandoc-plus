@@ -13,14 +13,21 @@ make image
 Usage is the same as with the original image:
 
 ```sh
-docker run --rm --volume "`pwd`:/data" --user `id -u`:`id -g` jzer7/pandoc:latex README.md
+docker run --rm \
+           --volume "`pwd`:/data" \
+           --user `id -u`:`id -g` \
+           jzer7/pandoc:latex-plus README.md
 ```
 
 To debug things, you might need to start in shell mode.
-For that, remove the _entrypoint_.
+For that, bypass the _entrypoint_ and start an interactive bash shell:
 
 ```sh
-docker run --rm --volume "`pwd`:/data" --user `id -u`:`id -g` --entrypoint "" jzer7/pandoc:latex /bin/bash
+docker run --rm -it \
+           --volume "`pwd`:/data" \
+           --user `id -u`:`id -g` \
+           --entrypoint "" \
+           jzer7/pandoc:latex-plus /bin/bash
 ```
 
 ## Starting point

@@ -1,34 +1,31 @@
-# top-most EditorConfig file
 root = true
 
 [*]
 charset = utf-8
 end_of_line = lf
+
 indent_size = 2
 indent_style = space
-insert_final_newline = false
-trim_trailing_whitespace = false
+
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{bash,sh,zsh}]
+indent_size = 4
 
 [{Dockerfile,*.dockerfile}]
 indent_size = 4
-indent_style = space
-insert_final_newline = true
-max_line_length = 100
 trim_trailing_whitespace = false
+
+[{Makefile*,*.mk}]
+indent_size = unset
+indent_style = tab
 
 [*.md]
 indent_size = 2
-insert_final_newline = true
 max_line_length = 90
-trim_trailing_whitespace = true
+trim_trailing_whitespace = false
 x-soft-wrap-text = true
 
-[{Makefile*,*.mk}]
-indent_size = 8
-indent_style = tab
-insert_final_newline = true
-
-[*.yaml]
+[*.{yaml,yml}]
 indent_size = 2
-max_line_length = 120
-insert_final_newline = true
