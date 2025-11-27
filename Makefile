@@ -30,3 +30,21 @@ test-container:
 	docker run --rm --entrypoint='' ${IMAGE_NAME}:${IMAGE_TAG} kpsewhich moderncv.cls
 	# Test user is not root
 	docker run --rm --entrypoint='' ${IMAGE_NAME}:${IMAGE_TAG} id -un | grep -v root
+
+.PHONY:
+test-conversion:
+	@echo "Testing document conversion..."
+	# Create a simple test document
+	echo "# Test Document" > test.md
+	echo "This is a test document to verify pandoc functionality." >> test.md
+	# Test markdown to PDF conversion
+	docker run --rm -v $$(pwd):/data ${IMAGE_NAME}:${IMAGE_TAG} \
+		test.md -o test.pdf
+	# Verify the PDF was created
+	test -f test.pdf
+	@echo "PDF conversion test passed!"
+
+.PHONY: test-cleanup
+test-cleanup:
+	@echo "Cleaning up test artifacts..."
+	rm -f test.md test.pdf
