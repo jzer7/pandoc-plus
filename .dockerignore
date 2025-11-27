@@ -1,8 +1,3 @@
-.editorconfig
-.git
-.gitignore
-.vscode
-*.swp
-cspell.*
-Makefile
-README.md
+.*
+*
+!Dockerfile
