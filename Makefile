@@ -2,6 +2,7 @@ BUILD_FLAGS :=
 DOCKERFILE := Dockerfile
 IMAGE_NAME ?= jzer7/pandoc
 IMAGE_TAG ?= latex-plus
+USR_GRP_ID := $$(id -u):$$(id -g)
 
 .PHONY: all
 all: image
@@ -38,7 +39,7 @@ test-conversion:
 	echo "# Test Document" > test.md
 	echo "This is a test document to verify pandoc functionality." >> test.md
 	# Test markdown to PDF conversion
-	docker run --rm -v $$(pwd):/data ${IMAGE_NAME}:${IMAGE_TAG} \
+	docker run --rm --user ${USR_GRP_ID} -v $$(pwd):/data ${IMAGE_NAME}:${IMAGE_TAG} \
 		test.md -o test.pdf
 	# Verify the PDF was created
 	test -f test.pdf
