@@ -1,59 +1,89 @@
 # Pandoc/LaTeX container image
 
-This image adds a few additional LaTeX packages to build documentation.
+[![Build and Test Docker Image](https://github.com/jzer7/pandoc-plus/actions/workflows/build-and-test-image.yml/badge.svg)](https://github.com/jzer7/pandoc-plus/actions/workflows/build-and-test-image.yml)
 
-## Build image
+This image simplifies the process of generating PDF documents from Markdown using Pandoc with LaTeX.
 
-```sh
-make image
-```
+It starts with the official [pandoc/latex:ubuntu](https://hub.docker.com/r/pandoc/latex) image, and adds a few additional LaTeX packages to produce better-formatted documents.
+The image also includes tools so it can be used in document pipelines.
+
+## Features
+
+- additional LaTeX styles and packages
+- simple tools (`make`, `wget`, and `unzip`)
+- run as a non-root user
+- CI/CD automated tests, builds, and publishing to GitHub Container Registry
 
 ## Usage
 
-Usage is the same as with the original image:
+The entrypoint of the image is set to `pandoc`.
+So it's usage is similar to running the `pandoc` command directly on a Linux host.
+
+```sh
+pandoc document.md -o document.pdf
+```
+
+To use a pre-built version of the Docker image, run:
 
 ```sh
 docker run --rm \
            --volume "`pwd`:/data" \
            --user `id -u`:`id -g` \
-           jzer7/pandoc:latex-plus README.md
+           ghcr.io/jzer7/pandoc-plus:main \
+           document.md -o document.pdf
 ```
 
-To debug things, you might need to start in shell mode.
-For that, bypass the _entrypoint_ and start an interactive bash shell:
+Or use a locally built version of the image:
+
+```sh
+docker run --rm \
+           --volume "`pwd`:/data" \
+           --user `id -u`:`id -g` \
+           jzer7/pandoc-plus \
+           document.md -o document.pdf
+```
+
+## Development
+
+### Build image
+
+The Makefile includes a target to build the image locally.
+
+```sh
+make image
+```
+
+It also supports environment variables to customize the build process.
+
+```sh
+# Build with a specific image tag
+make image IMAGE_TAG="v2.1"
+```
+
+### Debugging the container
+
+The image entrypoint is set to `pandoc`.
+So any command you pass to `docker run` will be executed as arguments to `pandoc`.
+To debug issues, you might want to bypass the entrypoint and start an interactive shell.
 
 ```sh
 docker run --rm -it \
            --volume "`pwd`:/data" \
            --user `id -u`:`id -g` \
            --entrypoint "" \
-           jzer7/pandoc:latex-plus /bin/bash
+           jzer7/pandoc-plus /bin/bash
 ```
 
-## Starting point
+## Container Registry
 
-This repo's Dockerfile start with the base image
+### Automated Builds
 
-- [pandoc/latex:latest-ubuntu](https://hub.docker.com/r/pandoc/latex)
+Container images are automatically built and published to GitHub Container Registry.
+Look at [`.github/workflows/build-and-push.yml`](.github/workflows/build-and-push.yml) for details.
 
-That image is based on the following layers:
+The path to the image is `ghcr.io/jzer7/pandoc-plus:TAG`.
+Where `TAG` can be:
 
-- [ubuntu:noble](https://github.com/docker-library/repo-info/blob/master/repos/ubuntu/tag-details.md#ubuntunoble)
-- [pandoc/core:VER-ubuntu](https://github.com/pandoc/dockerfiles/blob/main/ubuntu/Dockerfile)
-- [pandoc/latex:VER-ubuntu](https://github.com/pandoc/dockerfiles/blob/main/ubuntu/latex/Dockerfile)
-
-Which results in the image having:
-
-- pandoc
-- latex
-- workdir: `/data`
-- entrypoint: `/usr/local/bin/pandoc`
-- user: `root`
-
-## Customization
-
-Changes to that image:
-
-- run with non-root user
-- additional LaTeX packages
-- include `make`, `wget`, and `unzip`, which are often used during `make` runs
+- `main`: latest image built from `main` branch
+- `sha-<commit>`: specific commit
+- `vX.Y.Z`: release versions (when tagged)

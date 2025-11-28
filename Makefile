@@ -1,7 +1,7 @@
 BUILD_FLAGS :=
 DOCKERFILE := Dockerfile
-IMAGE_NAME ?= jzer7/pandoc
-IMAGE_TAG ?= latex-plus
+IMAGE_NAME ?= jzer7/pandoc-plus
+IMAGE_TAG ?= latest
 USR_GRP_ID := $$(id -u):$$(id -g)
 
 .PHONY: all
