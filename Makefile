@@ -1,8 +1,7 @@
-BUILD_FLAGS :=
-DOCKERFILE := Dockerfile
-IMAGE_NAME ?= jzer7/pandoc-plus
-IMAGE_TAG ?= latest
-USR_GRP_ID := $$(id -u):$$(id -g)
+BUILD_FLAGS := --platform linux/amd64,linux/arm64
+DOCKERFILE  := Dockerfile
+IMAGE_NAME  ?= jzer7/pandoc-plus
+IMAGE_TAG   ?= latest
 
 .PHONY: all
 all: image
@@ -19,7 +18,7 @@ refresh: ${Dockerfile}
 		docker image pull $${base}; \
 	done
 
-.PHONY:
+.PHONY: test-container
 test-container:
 	@echo "Testing Docker image functionality..."
 	# Test that the image runs and pandoc is available
@@ -32,7 +31,7 @@ test-container:
 	# Test user is not root
 	docker run --rm --entrypoint='' ${IMAGE_NAME}:${IMAGE_TAG} id -un | grep -v root
 
-.PHONY:
+.PHONY: test-conversion
 test-conversion:
 	@echo "Testing document conversion..."
 	# Create a simple test document
@@ -48,4 +47,5 @@ test-conversion:
 .PHONY: test-cleanup
 test-cleanup:
 	@echo "Cleaning up test artifacts..."
-	rm -f test.md test.pdf
+	@rm -f test.md test.pdf
+	@echo "Cleanup completed."

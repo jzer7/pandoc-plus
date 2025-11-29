@@ -50,6 +50,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -58,6 +59,6 @@ jobs:
 
       - name: Test Docker image functionality
         run: |
-          docker run --rm
+          docker run --rm \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
             pandoc --version

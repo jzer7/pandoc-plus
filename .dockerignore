@@ -1,3 +1,4 @@
+# Be explicit and secure. Ignore all files by default, but allow specific files
 .*
 *
 !Dockerfile
