@@ -3,6 +3,13 @@ DOCKERFILE  := Dockerfile
 IMAGE_NAME  ?= jzer7/pandoc-plus
 IMAGE_TAG   ?= latest
 
+IMAGE_FULL  := ${IMAGE_NAME}:${IMAGE_TAG}
+# Expected regular use of container image
+DOCKER_RUN  := docker run --rm --user $$(id -u):$$(id -g) -v $$(pwd):/data ${IMAGE_FULL}
+# For testing purposes, bypass entrypoint, user/group id, and volume mounting
+DOCKER_RUN_RAW := docker run --rm --entrypoint='' ${IMAGE_FULL}
+
+
 .PHONY: all
 all: image
 
@@ -22,26 +29,25 @@ refresh: ${Dockerfile}
 test-container:
 	@echo "Testing Docker image functionality..."
 	# Test that the image runs and pandoc is available
-	docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} pandoc --version
+	@${DOCKER_RUN_RAW} pandoc --version
 	# Test that LaTeX is available
-	docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} pdflatex --version
+	@${DOCKER_RUN_RAW} pdflatex --version
 	# Test that additional LaTeX packages are installed
-	docker run --rm --entrypoint='' ${IMAGE_NAME}:${IMAGE_TAG} kpsewhich enumitem.sty
-	docker run --rm --entrypoint='' ${IMAGE_NAME}:${IMAGE_TAG} kpsewhich moderncv.cls
+	@${DOCKER_RUN_RAW} kpsewhich enumitem.sty
+	@${DOCKER_RUN_RAW} kpsewhich moderncv.cls
 	# Test user is not root
-	docker run --rm --entrypoint='' ${IMAGE_NAME}:${IMAGE_TAG} id -un | grep -v root
+	@${DOCKER_RUN_RAW} sh -c 'if [ "$$(id -un)" = "root" ]; then echo "ERROR: Running as root!" && exit 1; else echo "OK: Running as $$(id -un)"; fi'
 
 .PHONY: test-conversion
 test-conversion:
 	@echo "Testing document conversion..."
 	# Create a simple test document
-	echo "# Test Document" > test.md
-	echo "This is a test document to verify pandoc functionality." >> test.md
+	@echo "# Test Document" > test.md
+	@echo "This is a test document to verify pandoc functionality." >> test.md
 	# Test markdown to PDF conversion
-	docker run --rm --user ${USR_GRP_ID} -v $$(pwd):/data ${IMAGE_NAME}:${IMAGE_TAG} \
-		test.md -o test.pdf
+	@${DOCKER_RUN} test.md -o test.pdf
 	# Verify the PDF was created
-	test -f test.pdf
+	@test -f test.pdf || (echo "ERROR: PDF not created!" && exit 1)
 	@echo "PDF conversion test passed!"
 
 .PHONY: test-cleanup
