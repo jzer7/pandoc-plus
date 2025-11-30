@@ -1,4 +1,4 @@
-FROM pandoc/latex:3.7-ubuntu
+FROM pandoc/latex:3.8-ubuntu
 
 LABEL org.opencontainers.image.authors="Juan Rubio <j.c.rubio@gmail.com>"
 LABEL org.opencontainers.image.base="pandoc/latex:3.7-ubuntu"
