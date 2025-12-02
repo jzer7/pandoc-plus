@@ -1,7 +1,7 @@
 # Load configuration file as environment variables
-ifneq (,$(wildcard .config.env))
-    include .config.env
-    export
+ifneq (,$(wildcard image.cfg))
+	include image.cfg
+	export
 endif
 
 # Set defaults for all variables
@@ -18,7 +18,7 @@ SYSTEM_PACKAGES ?= bsdextrautils make sudo unzip wget
 
 # Derived variables
 BUILD_FLAGS     := --platform $(PLATFORMS)
-BUILD_ARGS_FLAG := --build-arg $(BUILD_ARGS)
+BUILD_FLAGS     += --build-arg $(BUILD_ARGS)
 IMAGE_FULL      := ${IMAGE_NAME}:${IMAGE_TAG}
 
 # The first is the expected command to use the container image, the second
@@ -31,10 +31,25 @@ DOCKER_RUN_RAW  := docker run --rm --entrypoint='' ${IMAGE_FULL}
 .PHONY: all
 all: image
 
+.PHONY: show-config
+show-config:
+	@echo "Current configuration:"
+	@echo "  IMAGE_NAME:      $(IMAGE_NAME)"
+	@echo "  IMAGE_TAG:       $(IMAGE_TAG)"
+	@echo "  REGISTRY:        $(REGISTRY)"
+	@echo "  BASE_IMAGE:      $(BASE_IMAGE)"
+	@echo "  PLATFORMS:       $(PLATFORMS)"
+	@echo "  LATEX_PACKAGES:  $(LATEX_PACKAGES)"
+	@echo "  SYSTEM_PACKAGES: $(SYSTEM_PACKAGES)"
+
 .PHONY: image
 image: ${DOCKERFILE}
 	@echo "Building Docker image..."
-	docker buildx build ${BUILD_FLAGS} ${BUILD_ARGS_FLAG} \
+	docker buildx build ${BUILD_FLAGS} \
+		--build-arg BASE_IMAGE=$(BASE_IMAGE) \
+		--build-arg IMAGE_NAME=$(IMAGE_NAME) \
+		--build-arg LATEX_PACKAGES="$(LATEX_PACKAGES)" \
+		--build-arg SYSTEM_PACKAGES="$(SYSTEM_PACKAGES)" \
 		--cache-from type=local,src=/tmp/.buildx-cache \
 		--cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
 		-t ${IMAGE_NAME}:${IMAGE_TAG} .
@@ -71,8 +86,10 @@ test-conversion:
 	@echo "  ==> Creating test document..."
 	@echo "# Test Document" > test.md
 	@echo "This is a test document to verify pandoc functionality." >> test.md
+	@ls -l test.*
 	@echo "  ==> Converting markdown to PDF..."
 	@${DOCKER_RUN} test.md -o test.pdf
+	@ls -l test.*
 	@echo "  ==> Verifying PDF was created..."
 	@test -f test.pdf || (echo "ERROR: PDF not created!" && exit 1)
 	@echo "PDF conversion test passed!"
