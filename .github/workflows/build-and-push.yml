@@ -5,10 +5,6 @@ on:
     types: [published]
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   build-and-push:
     name: Build and push Docker image
@@ -22,6 +18,31 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v6
+
+      - name: Load configuration
+        id: config
+        run: |
+          if [ -f image.cfg ]; then
+            echo "Loading configuration from image.cfg"
+            source image.cfg
+          fi
+          echo "image-name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "registry=$REGISTRY" >> $GITHUB_OUTPUT
+          echo "base-image=$BASE_IMAGE" >> $GITHUB_OUTPUT
+          echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
+          echo "build-args=$BUILD_ARGS" >> $GITHUB_OUTPUT
+          echo "latex-packages=$LATEX_PACKAGES" >> $GITHUB_OUTPUT
+          echo "system-packages=$SYSTEM_PACKAGES" >> $GITHUB_OUTPUT
+          # Use GitHub repository for image name in registry
+          echo "full-image-name=${{ github.repository }}" >> $GITHUB_OUTPUT
+        env:
+          IMAGE_NAME:      jzer7/pandoc-plus
+          REGISTRY:        ghcr.io
+          BASE_IMAGE:      pandoc/latex:3.7-ubuntu
+          PLATFORMS:       linux/amd64,linux/arm64
+          BUILD_ARGS:      BUILDKIT_INLINE_CACHE=1
+          LATEX_PACKAGES:  ""
+          SYSTEM_PACKAGES: "make"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -37,7 +58,7 @@ jobs:
       - name: Log in to container registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ steps.config.outputs.registry }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -45,7 +66,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ steps.config.outputs.registry }}/${{ steps.config.outputs.full-image-name }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -58,7 +79,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ steps.config.outputs.platforms }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -68,5 +89,5 @@ jobs:
       - name: Test Docker image functionality
         run: |
           docker run --rm \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
+            ${{ steps.config.outputs.registry }}/${{ steps.config.outputs.full-image-name }}:sha-${{ github.sha }} \
             pandoc --version

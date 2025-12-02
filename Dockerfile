@@ -1,7 +1,13 @@
-FROM pandoc/latex:3.7-ubuntu
+ARG BASE_IMAGE=pandoc/latex:3.7-ubuntu
+FROM $BASE_IMAGE
+
+ARG IMAGE_NAME=pandoc/latex:3.7-ubuntu
+ARG LATEX_PACKAGES="enumitem moderncv sectsty underscore lastpage"
+ARG SYSTEM_PACKAGES="bsdextrautils make sudo unzip wget"
+
 
 LABEL org.opencontainers.image.authors="Juan Rubio <j.c.rubio@gmail.com>"
-LABEL org.opencontainers.image.base="pandoc/latex:3.7-ubuntu"
+LABEL org.opencontainers.image.base=${IMAGE_NAME}
 LABEL org.opencontainers.image.source="https://github.com/jzer7/pandoc-plus"
 LABEL org.opencontainers.image.description="Pandoc with LaTeX and additional packages for document generation"
 
@@ -15,28 +21,18 @@ EOT
 
 RUN <<EOT bash
     set -euxo pipefail
+    echo "Installing system packages: ${SYSTEM_PACKAGES}"
     apt-get update
-    apt-get install -y \
-        --no-install-recommends \
-        make \
-        unzip \
-        wget \
-        ;
+    apt-get install -y --no-install-recommends ${SYSTEM_PACKAGES}
     apt-get clean
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 EOT
 
-# Extra Tex styles
 RUN <<EOT bash
     set -euxo pipefail
+    echo "Installing LaTeX packages: ${LATEX_PACKAGES}"
     tlmgr update --self
-    tlmgr install \
-        enumitem \
-        moderncv \
-        sectsty \
-        underscore \
-        lastpage \
-        ;
+    tlmgr install ${LATEX_PACKAGES}
     tlmgr path remove
 EOT
 
