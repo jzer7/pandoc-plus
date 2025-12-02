@@ -28,11 +28,13 @@ DOCKER_RUN      := docker run --rm --user $$(id -u):$$(id -g) -v $$(pwd):/data $
 DOCKER_RUN_RAW  := docker run --rm --entrypoint='' ${IMAGE_FULL}
 
 
-.PHONY: all
-all: image
+.PHONY: help
+help: ## Show this help message
+	@echo "Available targets:"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: show-config
-show-config:
+show-config: ## Show current configuration values
 	@echo "Current configuration:"
 	@echo "  IMAGE_NAME:      $(IMAGE_NAME)"
 	@echo "  IMAGE_TAG:       $(IMAGE_TAG)"
@@ -43,7 +45,7 @@ show-config:
 	@echo "  SYSTEM_PACKAGES: $(SYSTEM_PACKAGES)"
 
 .PHONY: image
-image: ${DOCKERFILE}
+image: ${DOCKERFILE} ## Build Docker image
 	@echo "Building Docker image..."
 	docker buildx build ${BUILD_FLAGS} \
 		--build-arg BASE_IMAGE=$(BASE_IMAGE) \
@@ -59,7 +61,7 @@ image: ${DOCKERFILE}
 	fi
 
 .PHONY: refresh
-refresh: ${DOCKERFILE}
+refresh: ${DOCKERFILE} ## Pull latest base images
 	@echo "Refreshing base Docker images..."
 	@for base in $$(awk '/^FROM/{print $$2}' ${DOCKERFILE}); do \
 		echo "Pulling $$base..."; \
@@ -67,7 +69,7 @@ refresh: ${DOCKERFILE}
 	done
 
 .PHONY: test-container
-test-container:
+test-container: ## Test container functionality
 	@echo "Testing Docker image functionality..."
 	@echo "  ==> Testing pandoc availability..."
 	@${DOCKER_RUN_RAW} pandoc --version
@@ -81,7 +83,7 @@ test-container:
 	@echo "All container tests passed!"
 
 .PHONY: test-conversion
-test-conversion:
+test-conversion: ## Test document conversion
 	@echo "Testing document conversion..."
 	@echo "  ==> Creating test document..."
 	@echo "# Test Document" > test.md
@@ -95,7 +97,7 @@ test-conversion:
 	@echo "PDF conversion test passed!"
 
 .PHONY: test-cleanup
-test-cleanup:
+test-cleanup: ## Clean up test artifacts
 	@echo "Cleaning up test artifacts..."
 	@rm -f test.md test.pdf
 	@echo "Cleanup completed."
