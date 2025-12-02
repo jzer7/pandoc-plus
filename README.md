@@ -1,6 +1,6 @@
 # Pandoc/LaTeX container image
 
-[![Build and Test Docker Image](https://github.com/jzer7/pandoc-plus/actions/workflows/build-and-test-image.yml/badge.svg)](https://github.com/jzer7/pandoc-plus/actions/workflows/build-and-test-image.yml)
+[![Build, Test, and Publish](https://github.com/jzer7/pandoc-plus/actions/workflows/build-test-publish.yml/badge.svg)](https://github.com/jzer7/pandoc-plus/actions/workflows/build-test-publish.yml)
 
 This image simplifies the process of generating PDF documents from Markdown using Pandoc with LaTeX.
 
@@ -79,7 +79,7 @@ docker run --rm -it \
 ### Automated Builds
 
 Container images are automatically built and published to GitHub Container Registry.
-Look at [`.github/workflows/build-and-push.yml`](.github/workflows/build-and-push.yml) for details.
+Look at [`.github/workflows/build-test-publish.yml`](.github/workflows/build-test-publish.yml) for details.
 
 The path to the image is `ghcr.io/jzer7/pandoc-plus:TAG`.
 Where `TAG` can be:
