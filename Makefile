@@ -21,6 +21,9 @@ BUILD_FLAGS     := --platform $(PLATFORMS)
 BUILD_FLAGS     += --build-arg $(BUILD_ARGS)
 IMAGE_FULL      := ${IMAGE_NAME}:${IMAGE_TAG}
 
+ACT_IMAGE       := catthehacker/ubuntu:act-latest
+GHA_JOB         := build-and-test
+
 # The first is the expected command to use the container image, the second
 # bypasses the entrypoint, user/group id, and volume mounting (for testing
 # testing purposes only)
@@ -50,8 +53,8 @@ image: ${DOCKERFILE} ## Build Docker image
 	docker buildx build ${BUILD_FLAGS} \
 		--build-arg BASE_IMAGE=$(BASE_IMAGE) \
 		--build-arg IMAGE_NAME=$(IMAGE_NAME) \
-		--build-arg LATEX_PACKAGES="$(LATEX_PACKAGES)" \
-		--build-arg SYSTEM_PACKAGES="$(SYSTEM_PACKAGES)" \
+		--build-arg LATEX_PACKAGES=$(LATEX_PACKAGES) \
+		--build-arg SYSTEM_PACKAGES=$(SYSTEM_PACKAGES) \
 		--cache-from type=local,src=/tmp/.buildx-cache \
 		--cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
 		-t ${IMAGE_NAME}:${IMAGE_TAG} .
@@ -96,8 +99,31 @@ test-conversion: ## Test document conversion
 	@test -f test.pdf || (echo "ERROR: PDF not created!" && exit 1)
 	@echo "PDF conversion test passed!"
 
+.PHONY: act
+act: ## Run GitHub Actions workflow locally (requires act)
+	@echo "Running GitHub Actions workflow locally using act..."
+	@act \
+		--job build-test \
+		--platform ${ACT_PLATFORM} \
+		--actor ${IMAGE_NAME} \
+		--defaultbranch main \
+		--use-gitignore \
+		--bind \
+		--use-new-action-cache \
+		--strict
+
 .PHONY: test-cleanup
 test-cleanup: ## Clean up test artifacts
 	@echo "Cleaning up test artifacts..."
 	@rm -f test.md test.pdf
 	@echo "Cleanup completed."
+
+.PHONY: clean-build-artifacts
+clean-build-artifacts: ## Clean up build artifacts
+	@echo "Cleaning up build artifacts..."
+	@rm -rf /tmp/.buildx-cache*
+	@echo "Build artifacts cleanup completed."
+
+.PHONY: clean
+clean: test-cleanup test-build-artifacts ## Clean up build artifacts and cache
+	@echo "Clean completed."
