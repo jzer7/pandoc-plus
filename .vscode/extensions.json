@@ -2,6 +2,8 @@
     "recommendations": [
         "docker.docker",
         "editorconfig.editorconfig",
+        "github.vscode-github-actions",
+        "ms-azuretools.vscode-containers",
         "redhat.vscode-yaml",
         "streetsidesoftware.code-spell-checker"
     ]
