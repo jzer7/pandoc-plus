@@ -1,35 +1,33 @@
-# Load configuration file as environment variables
-ifneq (,$(wildcard image.cfg))
-	include image.cfg
-	export
+# Configuration: Fail-fast if image.cfg is missing or incomplete
+ifeq (,$(wildcard image.cfg))
+	$(error image.cfg file not found - this file is required for all configuration)
 endif
 
-# Set defaults for all variables
+include image.cfg
+export
+
+# Validate that all required variables are set
+REQUIRED_VARS   := IMAGE_NAME IMAGE_TAG REGISTRY BASE_IMAGE PLATFORMS LATEX_PACKAGES SYSTEM_PACKAGES
+$(foreach var,$(REQUIRED_VARS),$(if $($(var)),,$(error $(var) not set in image.cfg)))
+
+# Fixed values
 DOCKERFILE      := Dockerfile
-IMAGE_NAME      ?= jzer7/pandoc-plus
-IMAGE_TAG       ?= latest
-REGISTRY        ?= ghcr.io
-BASE_IMAGE      ?= pandoc/latex:3.7-ubuntu
-PLATFORMS       ?= linux/amd64,linux/arm64
-DOCKER_BUILDKIT ?= 1
-BUILD_ARGS      ?= BUILDKIT_INLINE_CACHE=1
-LATEX_PACKAGES  ?= enumitem moderncv sectsty underscore lastpage
-SYSTEM_PACKAGES ?= bsdextrautils make sudo unzip wget
 
 # Derived variables
-BUILD_FLAGS     := --platform $(PLATFORMS)
-BUILD_FLAGS     += --build-arg $(BUILD_ARGS)
-IMAGE_FULL      := ${IMAGE_NAME}:${IMAGE_TAG}
+BUILD_FLAGS     := --platform $(PLATFORMS) --build-arg $(BUILD_ARGS)
+IMAGE_FULL      := $(IMAGE_NAME):$(IMAGE_TAG)
 
-ACT_IMAGE       := catthehacker/ubuntu:act-latest
-GHA_JOB         := build-and-test
+# Docker run commands
+DOCKER_RUN      := docker run --rm --user $$(id -u):$$(id -g) --volume $$(pwd):/data $(IMAGE_FULL)
+DOCKER_RUN_RAW  := docker run --rm --entrypoint='' $(IMAGE_FULL)
 
-# The first is the expected command to use the container image, the second
-# bypasses the entrypoint, user/group id, and volume mounting (for testing
-# testing purposes only)
-DOCKER_RUN      := docker run --rm --user $$(id -u):$$(id -g) -v $$(pwd):/data ${IMAGE_FULL}
-DOCKER_RUN_RAW  := docker run --rm --entrypoint='' ${IMAGE_FULL}
+# Advanced variables (do not modify unless you understand the implications)
+ACT_PLATFORM    := ubuntu-latest=catthehacker/ubuntu:act-latest
 
+# Test configuration
+TEST_DIR := tests
+TEST_MD  := $(TEST_DIR)/test.md
+TEST_PDF := $(TEST_DIR)/test.pdf
 
 .PHONY: help
 help: ## Show this help message
