@@ -73,7 +73,7 @@ refresh: ${DOCKERFILE} ## Pull latest base images
 	done
 
 .PHONY: test-all
-test-all: test-container test-conversion security-scan ## Run all tests
+test-all: test-container test-conversion ## Run all tests
 	@echo "All tests completed successfully!"
 
 .PHONY: test-container

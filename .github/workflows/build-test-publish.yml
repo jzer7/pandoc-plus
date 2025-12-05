@@ -56,10 +56,9 @@ jobs:
 
       - name: Test container image
         run: |
-          # Override IMAGE_NAME and IMAGE_TAG for testing
-          export IMAGE_NAME=test-image
-          export IMAGE_TAG=latest
-          make test-all
+          # Override IMAGE_NAME and IMAGE_TAG for testing by passing them directly to make
+          # This bypasses the image.cfg loading in the Makefile
+          make test-all IMAGE_NAME=test-image IMAGE_TAG=latest
 
   publish:
     name: Publish container image
