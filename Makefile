@@ -29,7 +29,7 @@ ACT_PLATFORM    := ubuntu-latest=catthehacker/ubuntu:act-latest
 
 # Test configuration
 TEST_DIR := tests
-TEST_MD  := $(TEST_DIR)/test.md
+TEST_MD  := $(TEST_DIR)/test-features.md
 TEST_PDF := $(TEST_DIR)/test.pdf
 
 .PHONY: help
