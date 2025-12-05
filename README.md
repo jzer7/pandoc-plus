@@ -39,11 +39,22 @@ Or use a locally built version of the image:
 docker run --rm \
            --volume "`pwd`:/data" \
            --user `id -u`:`id -g` \
-           jzer7/pandoc-plus \
+           jzer7/pandoc-plus:latest \
            document.md -o document.pdf
 ```
 
 ## Development
+
+### Configuration
+
+All project configuration is centralized in `image.cfg`. This file is the **single source of truth** for all build parameters:
+
+- Image names and registry settings
+- LaTeX and system packages to install
+- Platform targets for multi-arch builds
+- Build optimization flags
+
+The build system will fail immediately if `image.cfg` is missing or if any required configuration values are not set.
 
 ### Build image
 
@@ -53,11 +64,15 @@ The Makefile includes a target to build the image locally.
 make image
 ```
 
-It also supports environment variables to customize the build process.
+To customize the build, edit `image.cfg` directly:
 
 ```sh
-# Build with a specific image tag
-make image IMAGE_TAG="v2.1"
+# Edit configuration
+vim image.cfg
+
+# Build with your changes
+make image
+```
 ```
 
 ### Debugging the container
