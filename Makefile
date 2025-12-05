@@ -14,7 +14,10 @@ $(foreach var,$(REQUIRED_VARS),$(if $($(var)),,$(error $(var) not set in image.c
 DOCKERFILE      := Dockerfile
 
 # Derived variables
-BUILD_FLAGS     := --platform $(PLATFORMS) --build-arg $(BUILD_ARGS)
+BUILD_FLAGS     := --platform $(PLATFORMS)
+ifeq ($(DOCKER_BUILDKIT), 1)
+BUILD_FLAGS     += --build-arg BUILDKIT_INLINE_CACHE=1
+endif
 IMAGE_FULL      := $(IMAGE_NAME):$(IMAGE_TAG)
 
 # Docker run commands
@@ -51,8 +54,8 @@ image: ${DOCKERFILE} ## Build Docker image
 	docker buildx build ${BUILD_FLAGS} \
 		--build-arg BASE_IMAGE=$(BASE_IMAGE) \
 		--build-arg IMAGE_NAME=$(IMAGE_NAME) \
-		--build-arg LATEX_PACKAGES=$(LATEX_PACKAGES) \
-		--build-arg SYSTEM_PACKAGES=$(SYSTEM_PACKAGES) \
+		--build-arg LATEX_PACKAGES="$(LATEX_PACKAGES)" \
+		--build-arg SYSTEM_PACKAGES="$(SYSTEM_PACKAGES)" \
 		--cache-from type=local,src=/tmp/.buildx-cache \
 		--cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
 		-t ${IMAGE_NAME}:${IMAGE_TAG} .
@@ -68,6 +71,10 @@ refresh: ${DOCKERFILE} ## Pull latest base images
 		echo "Pulling $$base..."; \
 		docker image pull $$base || exit 1; \
 	done
+
+.PHONY: test-all
+test-all: test-container test-conversion security-scan ## Run all tests
+	@echo "All tests completed successfully!"
 
 .PHONY: test-container
 test-container: ## Test container functionality
@@ -86,15 +93,11 @@ test-container: ## Test container functionality
 .PHONY: test-conversion
 test-conversion: ## Test document conversion
 	@echo "Testing document conversion..."
-	@echo "  ==> Creating test document..."
-	@echo "# Test Document" > test.md
-	@echo "This is a test document to verify pandoc functionality." >> test.md
-	@ls -l test.*
+	@rm -f $(TEST_PDF)
 	@echo "  ==> Converting markdown to PDF..."
-	@${DOCKER_RUN} test.md -o test.pdf
-	@ls -l test.*
+	@${DOCKER_RUN} ${TEST_MD} -o ${TEST_PDF}
 	@echo "  ==> Verifying PDF was created..."
-	@test -f test.pdf || (echo "ERROR: PDF not created!" && exit 1)
+	@test -f ${TEST_PDF} || (echo "ERROR: PDF not created!" && exit 1)
 	@echo "PDF conversion test passed!"
 
 .PHONY: act
@@ -110,18 +113,8 @@ act: ## Run GitHub Actions workflow locally (requires act)
 		--use-new-action-cache \
 		--strict
 
-.PHONY: test-cleanup
-test-cleanup: ## Clean up test artifacts
-	@echo "Cleaning up test artifacts..."
-	@rm -f test.md test.pdf
-	@echo "Cleanup completed."
-
-.PHONY: clean-build-artifacts
-clean-build-artifacts: ## Clean up build artifacts
-	@echo "Cleaning up build artifacts..."
-	@rm -rf /tmp/.buildx-cache*
-	@echo "Build artifacts cleanup completed."
-
 .PHONY: clean
-clean: test-cleanup test-build-artifacts ## Clean up build artifacts and cache
-	@echo "Clean completed."
+clean: ## Clean up test artifacts and build cache
+	@echo "Cleaning up..."
+	@rm -f $(TEST_PDF)
+	@echo "Cleanup completed."
