@@ -58,7 +58,7 @@ The build system will fail immediately if `image.cfg` is missing or if any requi
 
 ### Build image
 
-The Makefile includes a target to build the image locally.
+The Makefile includes a target to build the image locally:
 
 ```sh
 make image
@@ -73,7 +73,21 @@ vim image.cfg
 # Build with your changes
 make image
 ```
+
+### Available targets
+
+View all available Makefile targets:
+
+```sh
+make help
 ```
+
+Essential targets:
+
+- `make image` - Build the Docker image
+- `make test-all` - Run all tests (container + conversion)
+- `make show-config` - Display current configuration
+- `make clean` - Clean up test artifacts and build cache
 
 ### Debugging the container
 
