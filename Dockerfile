@@ -1,7 +1,7 @@
-ARG BASE_IMAGE=pandoc/latex:3.7-ubuntu
+ARG BASE_IMAGE=pandoc/latex:3.9-ubuntu
 FROM $BASE_IMAGE
 
-ARG IMAGE_NAME=pandoc/latex:3.7-ubuntu
+ARG IMAGE_NAME=jzer7/pandoc-plus
 ARG LATEX_PACKAGES="enumitem moderncv sectsty underscore lastpage"
 ARG SYSTEM_PACKAGES="bsdextrautils make sudo unzip wget"
 
