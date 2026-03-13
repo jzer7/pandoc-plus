@@ -8,24 +8,31 @@ indent_size = 2
 indent_style = space
 
 insert_final_newline = true
+max_line_length = 100
+spelling_lan = en-US
 trim_trailing_whitespace = true
 
 [*.{bash,sh,zsh}]
 indent_size = 4
+max_line_length = 80
+trim_trailing_whitespace = false
 
 [{Dockerfile,*.dockerfile}]
 indent_size = 4
 trim_trailing_whitespace = false
 
+[**/.{devcontainer,vscode}/*.json]
+indent_size = 4
+
 [{Makefile*,*.mk}]
 indent_size = unset
 indent_style = tab
+trim_trailing_whitespace = false
 
 [*.md]
-indent_size = 2
 max_line_length = 90
 trim_trailing_whitespace = false
 x-soft-wrap-text = true
 
 [*.{yaml,yml}]
-indent_size = 2
+max_line_length = 90

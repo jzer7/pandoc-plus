@@ -1,3 +1,5 @@
+# Args are passed by the commandline. These are just defaults
+# Any use of "FROM", nukes any previous "ARG". Redeclare those below.
 ARG BASE_IMAGE=pandoc/latex:3.9-ubuntu
 FROM $BASE_IMAGE
 
@@ -5,11 +7,11 @@ ARG IMAGE_NAME=jzer7/pandoc-plus
 ARG LATEX_PACKAGES="enumitem moderncv sectsty underscore lastpage"
 ARG SYSTEM_PACKAGES="bsdextrautils make sudo unzip wget"
 
-
 LABEL org.opencontainers.image.authors="Juan Rubio <j.c.rubio@gmail.com>"
 LABEL org.opencontainers.image.base=${IMAGE_NAME}
 LABEL org.opencontainers.image.source="https://github.com/jzer7/pandoc-plus"
 LABEL org.opencontainers.image.description="Pandoc with LaTeX and additional packages for document generation"
+LABEL org.opencontainers.image.vendor=""
 
 # Create user first to improve layer caching
 RUN <<EOT bash

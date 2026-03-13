@@ -67,10 +67,11 @@ image: ${DOCKERFILE} ## Build Docker image
 .PHONY: refresh
 refresh: ${DOCKERFILE} ## Pull latest base images
 	@echo "Refreshing base Docker images..."
-	@for base in $$(awk '/^FROM/{print $$2}' ${DOCKERFILE}); do \
-		echo "Pulling $$base..."; \
-		docker image pull $$base || exit 1; \
-	done
+	@docker image pull --quiet ${BASE_IMAGE}
+
+# ----------------------------------------------------------
+# Tests
+# ----------------------------------------------------------
 
 .PHONY: test-all
 test-all: test-container test-conversion ## Run all tests
@@ -112,6 +113,10 @@ act: ## Run GitHub Actions workflow locally (requires act)
 		--bind \
 		--use-new-action-cache \
 		--strict
+
+# ----------------------------------------------------------
+# Clean Up
+# ----------------------------------------------------------
 
 .PHONY: clean
 clean: ## Clean up test artifacts and build cache
